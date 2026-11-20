@@ -1,0 +1,45 @@
+<!doctype html>
+<!-- 0xnet (HackerOne) research page for the Amazon VRP. Static, display only: it shows what the embedding
+     web view hands to this page. Nothing is sent anywhere. -->
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0xnet research page (static)</title>
+<style>
+ body{font-family:monospace;font-size:15px;margin:10px;background:#fff;color:#000}
+ h1{font-size:17px;margin:0 0 8px 0}
+ .k{color:#555}
+ pre{white-space:pre-wrap;word-break:break-all;border:1px solid #999;padding:6px;margin:4px 0;font-size:14px}
+</style>
+</head>
+<body>
+<h1>0xnet research page - not Amazon content</h1>
+<div class="k">location</div><pre id="loc"></pre>
+<div class="k">window.ReactNativeWebView</div><pre id="rn"></pre>
+<div class="k">message events received by this page</div><pre id="msg">(none yet)</pre>
+<script>
+(function(){
+  function put(id, t){ document.getElementById(id).textContent = t; }
+  put('loc', location.href);
+  var n = 0, lines = [];
+  window.addEventListener('message', function(e){
+    n++;
+    var d; try { d = JSON.stringify(e.data); } catch (x) { d = String(e.data); }
+    lines.push('#' + n + ' ' + new Date().toISOString() + ' origin=' + e.origin + ' data=' + d);
+    put('msg', lines.join('\n'));
+  });
+  function rn(){
+    var o = window.ReactNativeWebView, t = 'typeof=' + typeof o;
+    if (o) {
+      try { t += ' keys=' + Object.keys(o).join(','); } catch (x) {}
+      try { t += ' postMessage=' + typeof o.postMessage; } catch (x) {}
+      try { if (typeof o.injectedObjectJson === 'function') t += '\ninjectedObjectJson()=' + JSON.stringify(o.injectedObjectJson()); } catch (x) { t += ' injErr=' + x; }
+    }
+    put('rn', t);
+  }
+  rn(); setTimeout(rn, 1500); setTimeout(rn, 4000);
+})();
+</script>
+</body>
+</html>
